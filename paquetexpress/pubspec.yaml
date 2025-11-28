@@ -30,6 +30,18 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  http: ^1.6.0
+  geolocator: ^14.0.2
+  google_maps_flutter: ^2.14.0
+  flutter_map: ^8.2.2
+  latlong2: ^0.9.1
+  google_fonts: ^6.3.2
+  geocoding: ^4.0.0
+  flutter_polyline_points: ^3.1.0
+  flutter_map_location_marker: ^10.1.0
+  provider: ^6.1.5+1
+  shared_preferences_riverpod: ^0.3.0
+  shared_preferences: ^2.5.3
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -52,10 +64,9 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
 
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
   uses-material-design: true
+  assets:
+    - assets/images/
 
   # To add assets to your application, add an assets section, like this:
   # assets:
