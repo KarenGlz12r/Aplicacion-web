@@ -1,3 +1,5 @@
+import asyncio
+
 import requests
 from datetime import datetime
 import hashlib
@@ -275,14 +277,15 @@ def listar(id_repa: int):
 #----------------REALIZAR ENTREGA----------------
 @app.post("/entrega/")
 async def entregar(
-    id_rep: int = Form(...),
-    id_pq: int = Form(...),
-    latitud: float = Form(...),
-    longitud: float = Form(...),
-    file: UploadFile = File(...)
+        id_rep: int = Form(...),
+        id_pq: int = Form(...),
+        latitud: float = Form(...),
+        longitud: float = Form(...),
+        file: UploadFile = File(...)
 ):
     db = SessionLocal()
     try:
+        # ✅ Validaciones rápidas
         repartidor = db.query(Repartidor).filter(Repartidor.id_r == id_rep).first()
         paquete = db.query(Paquete).filter(Paquete.id_pq == id_pq).first()
 
@@ -290,35 +293,34 @@ async def entregar(
             raise HTTPException(status_code=404, detail="No se encontró al repartidor")
         if not paquete:
             raise HTTPException(status_code=404, detail="No se encontró al paquete")
-
-        # Verificamos que el paquete este asignado al repartidor
         if paquete.id_rep != id_rep:
             raise HTTPException(status_code=404, detail="Este paquete no esta asignado")
 
-        # Obtener la dirección usando Nominatim
-        try:
-            url = f"https://nominatim.openstreetmap.org/reverse?format=json&lat={latitud}&lon={longitud}"
-            headers = {"User-Agent": "FastAPIApp/1.0"}
-            resp = requests.get(url, headers=headers, timeout=10)
-            if resp.status_code == 200:
-                j = resp.json()
-                address = j.get("display_name", "Direccion no disponible")
-            else:
-                address = "Dirección no disponible"
-        except Exception:
-            address = "Dirección no disponible"
-
-        # Generamos nombre para el archivo
+        # ✅ Procesar archivo de forma más eficiente
         fecha = datetime.now().strftime("%Y%m%d_%H%M%S")
         extension = os.path.splitext(file.filename)[1]
         filename = f"entrega_{id_pq}_{fecha}{extension}"
         ruta = f"uploads/{filename}"
 
-        # Guardamos el archivo
+        # Guardar archivo en chunks para evitar memory issues
         with open(ruta, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+            # Leer en chunks de 1MB
+            while True:
+                chunk = await file.read(1024 * 1024)  # 1MB chunks
+                if not chunk:
+                    break
+                buffer.write(chunk)
 
-        # Creamos la entrega
+        # ✅ Geocoding con timeout usando ThreadPool
+        address = "Dirección no disponible"
+        try:
+            with ThreadPoolExecutor() as executor:
+                future = executor.submit(obtener_direccion_sync, latitud, longitud)
+                address = future.result(timeout=10)  # 10 segundos timeout
+        except Exception as e:
+            print(f"⚠️ Timeout en geocoding: {e}")
+
+        # ✅ Crear entrega
         entrega = Entrega(
             id_p=id_pq,
             id_re=id_rep,
@@ -332,7 +334,7 @@ async def entregar(
         db.commit()
         db.refresh(entrega)
 
-        # Actualizamos su estado a entregado:
+        # ✅ Actualizar estado
         paquete.estado = "Entregado"
         db.commit()
 
@@ -343,11 +345,35 @@ async def entregar(
             "url_foto": f"/uploads/{filename}",
             "direccion": address
         }
+
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
     finally:
         db.close()
+
+
+def obtener_direccion_sync(latitud: float, longitud: float) -> str:
+    """Función sincrónica para geocoding"""
+    try:
+        url = f"https://nominatim.openstreetmap.org/reverse?format=json&lat={latitud}&lon={longitud}"
+        headers = {"User-Agent": "FastAPIApp/1.0"}
+        resp = requests.get(url, headers=headers, timeout=8)
+        if resp.status_code == 200:
+            j = resp.json()
+            return j.get("display_name", "Direccion no disponible")
+        return "Dirección no disponible"
+    except Exception:
+        return "Dirección no disponible"
+#-----------------Entregas-----------
+
+@app.get("/entregas/listar")
+def listar():
+    db = SessionLocal()
+
+    entregas = db.query(Entrega).all()
+
+    return entregas
 
 #-------------CREAR PAQUETE--------------
 @app.post("/paquetes/crear/")
