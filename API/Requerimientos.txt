@@ -1,0 +1,49 @@
+Software:
+
+Python 3.8+ (recomendado 3.9 o superior)
+
+MySQL Server (versión 5.7+ o 8.0+)
+
+pip (gestor de paquetes de Python)
+
+Dependencias de python:
+fastapi>=0.104.0
+uvicorn>=0.24.0
+sqlalchemy>=2.0.0
+mysql-connector-python>=8.1.0
+pydantic>=2.0.0
+python-multipart>=0.0.6
+requests>=2.31.0
+python-dateutil>=2.8.0
+starlette>=0.27.0
+
+Base de datos:
+MySQL ejecutándose en localhost:3309
+
+Base de datos llamada evaluacion
+
+Usuario: root con contraseña: root123 o sin contraseña
+
+O modificar DATABASE_URL en el código según tu configuración
+
+4.Configuración de Red
+Puerto para FastAPI (generalmente 8000)
+
+Acceso a internet para el servicio Nominatim (OpenStreetMap)
+
+🚀 Instalación Rápida
+
+1. Instalar dependencias:
+
+bash
+pip install fastapi uvicorn sqlalchemy mysql-connector-python pydantic python-multipart requests
+
+
+2. Configurar MySQL:
+
+En MySQL ingresar : 
+CREATE DATABASE evaluacion;
+
+-- Las tablas se crean automáticamente al ejecutar la API (repartidor, paquetes, entregas, admin)
+
+
