@@ -40,6 +40,10 @@ class AuthWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<Authprovider>(context);
+    print('AuthWrapper - isInitialized: ${authProvider.isInitialized}');
+    print('AuthWrapper - isloggedIn: ${authProvider.isloggedIn}');
+    print('AuthWrapper - esAdmin: ${authProvider.esAdmin}');
+    print('AuthWrapper - transportistaId: ${authProvider.transportistaId}');
 
     // Si aún no se inicializó, mostrar loading
     if (!authProvider.isInitialized) {

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'package:paquetexpress/main.dart';
 import 'package:paquetexpress/pantallas/AdminInicio.dart';
 import 'package:provider/provider.dart';
 import '../AuthProvider.dart';
@@ -69,11 +70,15 @@ class _FormularioState extends State<Formulario> {
         _emailController.clear();
         _contraController.clear();
 
-        ScaffoldMessenger.of(
+        Navigator.pushAndRemoveUntil(
           context,
-        ).showSnackBar(const SnackBar(content: Text('Bienvenido')));
+          MaterialPageRoute(builder: (_) => AuthWrapper()),
+          (route) => false,
+        );
 
-        // NO necesitas Navigatorporque el consumer se construye automaticamente
+        // ScaffoldMessenger.of(
+        //   context,
+        // ).showSnackBar(const SnackBar(content: Text('Bienvenido')));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Credenciales incorrectas')),
@@ -222,7 +227,7 @@ class _FormularioState extends State<Formulario> {
                             ),
                           );
                         },
-                        child: const Text("IInicio de sesion Administrador"),
+                        child: const Text("Inicio de sesion Administrador"),
                       ),
                     ],
                   ),

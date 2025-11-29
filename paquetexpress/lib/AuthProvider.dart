@@ -164,7 +164,7 @@ class Authprovider with ChangeNotifier {
       await prefs.remove('transportista_id');
       // Elimina el email del usuario de la persistencia
       await prefs.remove('user_email');
-      await prefs.remove('es_admin');
+      await prefs.remove('esaAdmin');
 
       // Actualiza el estado interno: ya no hay sesión
       _isloggedIn = false;
