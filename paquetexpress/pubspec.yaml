@@ -43,6 +43,10 @@ dependencies:
   shared_preferences_riverpod: ^0.3.0
   shared_preferences: ^2.5.3
   image_picker: ^1.2.1
+  camera: ^0.11.3
+  path_provider: ^2.1.5
+  camera_windows: ^0.2.6+4
+  
   
 
   # The following adds the Cupertino Icons font to your application.

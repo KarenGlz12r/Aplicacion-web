@@ -1,5 +1,6 @@
 // Import principal de Flutter (widgets y material design)
 import 'package:flutter/material.dart';
+import 'package:paquetexpress/pantallas/Admin.dart';
 // Importa la pantalla de inicio que muestra la UI luego de autenticarse
 import './pantallas/inicioSesion.dart';
 // NOTE: La importación de DeliveryRoute se eliminó porque no se usa en este archivo.
@@ -7,6 +8,7 @@ import './pantallas/inicioSesion.dart';
 import './pantallas/menu.dart';
 // Librería para persistir datos simples (par clave-valor) en el dispositivo
 import 'package:shared_preferences/shared_preferences.dart';
+import './pantallas/AdminInicio.dart';
 
 // Clase que gestiona el estado de autenticación y notifica cambios a la UI
 class Authprovider with ChangeNotifier {
@@ -30,6 +32,14 @@ class Authprovider with ChangeNotifier {
   String? get userEmail => _usermail;
   // Getter que indica si el provider ya verificó el estado de sesión
   bool get isInitialized => _isInitialized;
+
+  static const List<String> admins = ['gabriel@example.com'];
+
+  // Metodo para verificar si es admin
+  bool get esAdmin {
+    return _usermail != null &&
+        admins.contains(_usermail!.toLowerCase().trim());
+  }
 
   // Constructor: arranca la inicialización automática al crear la instancia
   Authprovider() {
@@ -161,8 +171,13 @@ class Authprovider with ChangeNotifier {
 
     // Si hay sesión válida y se conoce el id del transportista, mostrar inicio
     if (_isloggedIn && _transportista_id != null) {
+      if (esAdmin) {
+        return AdminPanel();
+      }
       // Si está logueado, retorna la pantalla de inicio, pasando el id
-      return Inicio(transportistaId: _transportista_id!);
+      else {
+        return Inicio(transportistaId: _transportista_id!);
+      }
     } else {
       // En caso contrario, mostrar el formulario de inicio de sesión
       return Formulario();

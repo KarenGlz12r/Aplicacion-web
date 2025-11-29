@@ -82,47 +82,12 @@ class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
                   children: [
-                    CircleAvatar(
-                      radius: 40,
-                      backgroundColor: Colors.grey.shade200,
-                      backgroundImage:
-                          transportista!['rep_img'] != null &&
-                              transportista!['rep_img'].toString().isNotEmpty
-                          ? NetworkImage(transportista!['rep_img'])
-                          : null,
-                      child:
-                          transportista!['rep_img'] == null ||
-                              transportista!['rep_img'].toString().isEmpty
-                          ? Icon(
-                              Icons.person,
-                              color: Colors.blue.shade900,
-                              size: 40,
-                            )
-                          : null,
-                    ),
-                    SizedBox(width: 16),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Nombre: ${transportista!['rep_nom'] ?? "-"}',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey.shade700,
-                            ),
-                          ),
-                          SizedBox(height: 2),
-                          Text(
-                            'Apellido Paterno: ${transportista!['rep_app'] ?? "-"}',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey.shade700,
-                            ),
-                          ),
-                          SizedBox(height: 2),
-                          Text(
-                            'Apellido Materno: ${transportista!['rep_apm'] ?? "-"}',
+                            'Nombre: ${transportista!['r_nomC'] ?? "-"}',
                             style: TextStyle(
                               fontSize: 16,
                               color: Colors.grey.shade700,
@@ -130,15 +95,7 @@ class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            'ID: ${transportista!['id_rep']}',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey.shade700,
-                            ),
-                          ),
-                          SizedBox(height: 2),
-                          Text(
-                            'Licencia: ${transportista!['rep_licencia'] ?? "-"}',
+                            'ID: ${transportista!['id_r']}',
                             style: TextStyle(
                               fontSize: 16,
                               color: Colors.grey.shade700,

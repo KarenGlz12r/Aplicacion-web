@@ -313,11 +313,14 @@ class _RutaPantallaState extends State<RutaPantalla> {
             SizedBox(height: 15),
             ElevatedButton(
               onPressed: () {
+                print("Destinatario: ${widget.paquete['destinatario']}");
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (_) =>
-                        Entrega(id_paquete: widget.paquete['id_pq']),
+                    builder: (_) => Entrega(
+                      id_paquete: widget.paquete['id_pq'],
+                      destinatario: widget.paquete['destinatario'],
+                    ),
                   ),
                 );
               },

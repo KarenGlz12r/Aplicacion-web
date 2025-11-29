@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -10,7 +11,7 @@ import 'Rutas.dart';
 class PaquetesSinEntregar extends StatefulWidget {
   final int
   transportistaId; // EL ID DEL TRANSPORTISTA, PARA HACER LA BUSQUEDA DE PAQUETES
-  final VoidCallback?
+  final VoidCallback? //PARA
   onRecargar; //Cada tanto recarga la pantalla para mantener actualizada la lista
 
   const PaquetesSinEntregar({
@@ -28,15 +29,31 @@ class PaquetesSinEntregar extends StatefulWidget {
 class _PaquetesSinEntregarState extends State<PaquetesSinEntregar> {
   List<dynamic> paquetes = []; //SE CREA UNA LISTA PARA RECIBIR LOS PAQUETES
   bool cargando = true;
+  Timer? tiempo;
 
   @override
   void initState() {
     super.initState();
     obtenerPaquetes();
+    actualizar();
   }
 
-  Future<void> obtenerPaquetes() async {
-    setState(() => cargando = true);
+  @override
+  void dispose() {
+    tiempo?.cancel();
+    super.dispose();
+  }
+
+  void actualizar() {
+    tiempo = Timer.periodic(const Duration(seconds: 10), (timer) {
+      if (mounted) {
+        obtenerPaquetes(silent: true);
+      }
+    });
+  }
+
+  Future<void> obtenerPaquetes({bool silent = false}) async {
+    if (!silent) setState(() => cargando = true);
 
     try {
       final url = Uri.parse(
@@ -70,8 +87,6 @@ class _PaquetesSinEntregarState extends State<PaquetesSinEntregar> {
 
   @override
   Widget build(BuildContext context) {
-    final Color azulOscuro = const Color.fromARGB(255, 23, 43, 77);
-
     return Container(
       color: const Color.fromARGB(255, 0, 61, 105),
       child: cargando

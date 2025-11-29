@@ -2,21 +2,19 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
-import 'package:paquetexpress/pantallas/AdminInicio.dart';
 import 'package:provider/provider.dart';
 import '../AuthProvider.dart';
 import 'Admin.dart';
-import 'AdminInicio.dart';
 // import 'registro.dart';
 
-class Formulario extends StatefulWidget {
-  const Formulario({super.key});
+class FormularioAdmin extends StatefulWidget {
+  const FormularioAdmin({super.key});
 
   @override
-  State<Formulario> createState() => _FormularioState();
+  State<FormularioAdmin> createState() => _FormularioState();
 }
 
-class _FormularioState extends State<Formulario> {
+class _FormularioState extends State<FormularioAdmin> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _contraController = TextEditingController();
@@ -40,7 +38,7 @@ class _FormularioState extends State<Formulario> {
     });
 
     try {
-      final url = Uri.parse('http://localhost:8000/login');
+      final url = Uri.parse('http://localhost:8000/login/admin');
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
@@ -49,7 +47,7 @@ class _FormularioState extends State<Formulario> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final transportistaIdRaw = data["id_r"];
+        final transportistaIdRaw = data["id"];
 
         if (transportistaIdRaw == null) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -69,11 +67,16 @@ class _FormularioState extends State<Formulario> {
         _emailController.clear();
         _contraController.clear();
 
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Bienvenido')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Bienvenido Administrador')),
+        );
 
-        // NO necesitas Navigatorporque el consumer se construye automaticamente
+        // Navegar
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => AdminPanel()),
+          (route) => false,
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Credenciales incorrectas')),
@@ -213,17 +216,6 @@ class _FormularioState extends State<Formulario> {
                             : const Text("Iniciar Sesión"),
                       ),
                       const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => FormularioAdmin(),
-                            ),
-                          );
-                        },
-                        child: const Text("IInicio de sesion Administrador"),
-                      ),
                     ],
                   ),
                 ),
@@ -233,5 +225,167 @@ class _FormularioState extends State<Formulario> {
         ),
       ),
     );
+  }
+}
+
+class ConfiguracionScreen extends StatefulWidget {
+  final int transportistaId;
+
+  const ConfiguracionScreen({super.key, required this.transportistaId});
+
+  @override
+  State<ConfiguracionScreen> createState() => _ConfiguracionScreenState();
+}
+
+class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
+  Map<String, dynamic>? transportista;
+  bool isLoading = true;
+  String? errorMessage;
+
+  @override
+  Widget build(BuildContext context) {
+    final authProvider = Provider.of<Authprovider>(context, listen: false);
+
+    if (isLoading) {
+      return Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    if (errorMessage != null) {
+      return Scaffold(body: Center(child: Text('Error: $errorMessage')));
+    }
+
+    return Scaffold(
+      backgroundColor: Colors.blue.shade800,
+      appBar: AppBar(
+        title: Text('Configuración'),
+        backgroundColor: Colors.blue.shade900,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView(
+                children: [
+                  _buildOptionCard(
+                    icon: Icons.notifications,
+                    title: 'Notificaciones',
+                    subtitle: 'Configurar alertas y notificaciones',
+                    onTap: () {},
+                  ),
+                  _buildOptionCard(
+                    icon: Icons.security,
+                    title: 'Privacidad',
+                    subtitle: 'Configuración de privacidad y seguridad',
+                    onTap: () {},
+                  ),
+                  _buildOptionCard(
+                    icon: Icons.help,
+                    title: 'Ayuda y Soporte',
+                    subtitle: 'Centro de ayuda y contacto',
+                    onTap: () {},
+                  ),
+                  SizedBox(height: 24),
+                  Card(
+                    elevation: 4,
+                    color: Colors.red.shade50,
+                    child: ListTile(
+                      leading: Icon(Icons.logout, color: Colors.red),
+                      title: Text(
+                        'Cerrar Sesión',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      subtitle: Text(
+                        'Salir de tu cuenta actual',
+                        style: TextStyle(color: Colors.red.shade700),
+                      ),
+                      trailing: Icon(Icons.chevron_right, color: Colors.red),
+                      onTap: () {
+                        _showLogoutDialog(context, authProvider);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOptionCard({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return Card(
+      elevation: 2,
+      child: ListTile(
+        leading: Icon(icon, color: Colors.blue.shade800),
+        title: Text(title),
+        subtitle: Text(subtitle),
+        trailing: Icon(Icons.chevron_right, color: Colors.grey),
+        onTap: onTap,
+      ),
+    );
+  }
+
+  void _showLogoutDialog(BuildContext context, Authprovider authProvider) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Cerrar Sesión'),
+          content: Text('¿Estás seguro de que quieres cerrar sesión?'),
+          actions: [
+            TextButton(
+              child: Text('Cancelar'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              child: Text('Cerrar Sesión', style: TextStyle(color: Colors.red)),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _performLogout(context, authProvider);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _performLogout(
+    BuildContext context,
+    Authprovider authProvider,
+  ) async {
+    // Mostrar diálogo de carga
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      // Hacer logout
+      await authProvider.logout();
+
+      // Cerrar el diálogo de carga
+      Navigator.of(context).pop();
+
+      // El Consumer en main.dart se encargará de mostrar el login automáticamente
+    } catch (e) {
+      // En caso de error, cerrar el diálogo y mostrar mensaje
+      Navigator.of(context).pop(); // Cerrar el diálogo de progreso
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error al cerrar sesión: $e')));
+    }
   }
 }
