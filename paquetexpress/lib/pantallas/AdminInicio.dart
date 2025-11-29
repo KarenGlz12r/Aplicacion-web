@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import '../AuthProvider.dart';
 import 'Admin.dart';
+import 'package:paquetexpress/main.dart';
 // import 'registro.dart';
 
 class FormularioAdmin extends StatefulWidget {
@@ -63,8 +64,10 @@ class _FormularioState extends State<FormularioAdmin> {
         _emailController.clear();
         _contraController.clear();
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Bienvenido Administrador')),
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => AuthWrapper()),
+          (route) => false,
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
