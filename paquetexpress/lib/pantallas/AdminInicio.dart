@@ -47,22 +47,18 @@ class _FormularioState extends State<FormularioAdmin> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final transportistaIdRaw = data["id"];
+        final adminId = data["id"];
 
-        if (transportistaIdRaw == null) {
+        if (adminId == null) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('ID de usuario inválido')),
           );
           return;
         }
-        // Si el id no es int, lo convierte
-        final transportistaId = transportistaIdRaw is int
-            ? transportistaIdRaw
-            : int.parse(transportistaIdRaw.toString());
 
         // Guardar la sesión - esto automáticamente triggereará la reconstrucción
         final authProvider = Provider.of<Authprovider>(context, listen: false);
-        await authProvider.saveLogin(transportistaId, email);
+        await authProvider.saveAdminLogin(adminId, email);
 
         _emailController.clear();
         _contraController.clear();
@@ -225,167 +221,5 @@ class _FormularioState extends State<FormularioAdmin> {
         ),
       ),
     );
-  }
-}
-
-class ConfiguracionScreen extends StatefulWidget {
-  final int transportistaId;
-
-  const ConfiguracionScreen({super.key, required this.transportistaId});
-
-  @override
-  State<ConfiguracionScreen> createState() => _ConfiguracionScreenState();
-}
-
-class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
-  Map<String, dynamic>? transportista;
-  bool isLoading = true;
-  String? errorMessage;
-
-  @override
-  Widget build(BuildContext context) {
-    final authProvider = Provider.of<Authprovider>(context, listen: false);
-
-    if (isLoading) {
-      return Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-
-    if (errorMessage != null) {
-      return Scaffold(body: Center(child: Text('Error: $errorMessage')));
-    }
-
-    return Scaffold(
-      backgroundColor: Colors.blue.shade800,
-      appBar: AppBar(
-        title: Text('Configuración'),
-        backgroundColor: Colors.blue.shade900,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView(
-                children: [
-                  _buildOptionCard(
-                    icon: Icons.notifications,
-                    title: 'Notificaciones',
-                    subtitle: 'Configurar alertas y notificaciones',
-                    onTap: () {},
-                  ),
-                  _buildOptionCard(
-                    icon: Icons.security,
-                    title: 'Privacidad',
-                    subtitle: 'Configuración de privacidad y seguridad',
-                    onTap: () {},
-                  ),
-                  _buildOptionCard(
-                    icon: Icons.help,
-                    title: 'Ayuda y Soporte',
-                    subtitle: 'Centro de ayuda y contacto',
-                    onTap: () {},
-                  ),
-                  SizedBox(height: 24),
-                  Card(
-                    elevation: 4,
-                    color: Colors.red.shade50,
-                    child: ListTile(
-                      leading: Icon(Icons.logout, color: Colors.red),
-                      title: Text(
-                        'Cerrar Sesión',
-                        style: TextStyle(
-                          color: Colors.red,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      subtitle: Text(
-                        'Salir de tu cuenta actual',
-                        style: TextStyle(color: Colors.red.shade700),
-                      ),
-                      trailing: Icon(Icons.chevron_right, color: Colors.red),
-                      onTap: () {
-                        _showLogoutDialog(context, authProvider);
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOptionCard({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
-    return Card(
-      elevation: 2,
-      child: ListTile(
-        leading: Icon(icon, color: Colors.blue.shade800),
-        title: Text(title),
-        subtitle: Text(subtitle),
-        trailing: Icon(Icons.chevron_right, color: Colors.grey),
-        onTap: onTap,
-      ),
-    );
-  }
-
-  void _showLogoutDialog(BuildContext context, Authprovider authProvider) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Cerrar Sesión'),
-          content: Text('¿Estás seguro de que quieres cerrar sesión?'),
-          actions: [
-            TextButton(
-              child: Text('Cancelar'),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            TextButton(
-              child: Text('Cerrar Sesión', style: TextStyle(color: Colors.red)),
-              onPressed: () async {
-                Navigator.of(context).pop();
-                await _performLogout(context, authProvider);
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> _performLogout(
-    BuildContext context,
-    Authprovider authProvider,
-  ) async {
-    // Mostrar diálogo de carga
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => Center(child: CircularProgressIndicator()),
-    );
-
-    try {
-      // Hacer logout
-      await authProvider.logout();
-
-      // Cerrar el diálogo de carga
-      Navigator.of(context).pop();
-
-      // El Consumer en main.dart se encargará de mostrar el login automáticamente
-    } catch (e) {
-      // En caso de error, cerrar el diálogo y mostrar mensaje
-      Navigator.of(context).pop(); // Cerrar el diálogo de progreso
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error al cerrar sesión: $e')));
-    }
   }
 }

@@ -23,6 +23,7 @@ class Authprovider with ChangeNotifier {
 
   // Marca si la verificación inicial (lectura de SharedPreferences) ya se hizo
   bool _isInitialized = false;
+  bool _esAdmin = false;
 
   // Getter público para saber si hay sesión activa
   bool get isloggedIn => _isloggedIn;
@@ -36,10 +37,7 @@ class Authprovider with ChangeNotifier {
   static const List<String> admins = ['gabriel@example.com'];
 
   // Metodo para verificar si es admin
-  bool get esAdmin {
-    return _usermail != null &&
-        admins.contains(_usermail!.toLowerCase().trim());
-  }
+  bool get esAdmin => _esAdmin;
 
   // Constructor: arranca la inicialización automática al crear la instancia
   Authprovider() {
@@ -62,21 +60,25 @@ class Authprovider with ChangeNotifier {
       final saveTransId = prefs.getInt('transportista_id');
       // Lee el email de usuario guardado (si existe)
       final savedEmail = prefs.getString('user_email');
+      final savedAdmin = prefs.getBool('esAdmin') ?? false;
 
       // Log para depuración con los valores leídos
-      print('Login: saveTransId=$saveTransId, savedEmail=$savedEmail');
-
+      print(
+        'Login: saveTransId=$saveTransId, savedEmail=$savedEmail, esAdmin=$savedAdmin',
+      );
       // Si existe un id válido (>0), consideramos que existe una sesión
       if (saveTransId != null && saveTransId > 0) {
         // Marcar como logueado y asignar valores leídos de prefs
         _isloggedIn = true;
         _transportista_id = saveTransId;
         _usermail = savedEmail;
+        _esAdmin = savedAdmin;
       } else {
         // No hay sesión: asegurar valores por defecto
         _isloggedIn = false;
         _transportista_id = null;
         _usermail = null;
+        _esAdmin = false;
       }
     } catch (e) {
       // Manejo de errores: si hay fallo leyendo prefs, limpiamos el estado
@@ -84,10 +86,38 @@ class Authprovider with ChangeNotifier {
       _isloggedIn = false;
       _transportista_id = null;
       _usermail = null;
+      _esAdmin = false;
     } finally {
       // Marcar como inicializado (aun en caso de error) y notificar a los listeners
       _isInitialized = true;
       notifyListeners();
+    }
+  }
+
+  // Guardar login del admin
+
+  Future<void> saveAdminLogin(int admin, String email) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('transportista_id', admin);
+      await prefs.setString('user_email', email);
+      await prefs.setBool('esAdmin', true);
+
+      // Actualiza el estado interno: hay sesión activa
+      _isloggedIn = true;
+      // Guarda el id y email en memoria del provider
+      _transportista_id = admin;
+      _usermail = email;
+      _esAdmin = true;
+
+      // Log de confirmación
+      print(' Sesión guardada: adminId=$admin, email=$email');
+      // Notifica a la UI que el estado cambió
+      notifyListeners();
+    } catch (e) {
+      // Si ocurre un error al guardar, imprimimos y re-lanzamos para manejo externo
+      print(' Error en guardar login: $e');
+      rethrow;
     }
   }
 
@@ -101,12 +131,14 @@ class Authprovider with ChangeNotifier {
       await prefs.setInt('transportista_id', transportId);
       // Escribe el email del usuario en persistencia
       await prefs.setString('user_email', email);
+      await prefs.setBool('esAdmin', false);
 
       // Actualiza el estado interno: hay sesión activa
       _isloggedIn = true;
       // Guarda el id y email en memoria del provider
       _transportista_id = transportId;
       _usermail = email;
+      _esAdmin = false;
 
       // Log de confirmación
       print(' Sesión guardada: transportId=$transportId, email=$email');
@@ -132,11 +164,13 @@ class Authprovider with ChangeNotifier {
       await prefs.remove('transportista_id');
       // Elimina el email del usuario de la persistencia
       await prefs.remove('user_email');
+      await prefs.remove('es_admin');
 
       // Actualiza el estado interno: ya no hay sesión
       _isloggedIn = false;
       _transportista_id = null;
       _usermail = null;
+      _esAdmin = false;
 
       // Confirma la finalización del logout
       print(' Logout completado');

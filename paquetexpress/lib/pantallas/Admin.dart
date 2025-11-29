@@ -2,10 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:paquetexpress/pantallas/menu.dart';
 import 'package:provider/provider.dart';
 import 'dart:convert';
 import 'dart:async';
 import '../AuthProvider.dart';
+import './inicioSesion.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AdminPanel extends StatefulWidget {
@@ -1030,7 +1032,10 @@ class _ConfiguracionScreenState extends State<ConfiguracionScreen> {
       await authProvider.logout();
 
       // Cerrar el diálogo de carga
-      Navigator.of(context).pop();
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => Formulario()),
+      );
 
       // El Consumer en main.dart se encargará de mostrar el login automáticamente
     } catch (e) {
