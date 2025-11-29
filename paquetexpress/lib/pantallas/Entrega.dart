@@ -157,6 +157,7 @@ class _EntregaState extends State<Entrega> {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text("Entrega realizada")));
+        final authProvider = Provider.of<Authprovider>(context, listen: false);
         Navigator.pop(context);
       } else {
         final error = json.decode(body);

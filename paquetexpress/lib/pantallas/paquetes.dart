@@ -186,6 +186,10 @@ class _PaquetesSinEntregarState extends State<PaquetesSinEntregar> {
 
                           // Al volver de la pantalla de ruta, recargamos la lista
                           recargar();
+                          Provider.of<DeliveryProvider>(
+                            context,
+                            listen: false,
+                          ).finishRoute();
                         },
                         child: Text(
                           "Iniciar entrega",

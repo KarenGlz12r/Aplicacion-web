@@ -9,8 +9,6 @@ class DeliveryProvider extends ChangeNotifier {
 
   bool get hasActiveRoute => _activeRoute != null;
 
-  final String apiUrl = "http://localhost:8000";
-
   // ------------------------------
   //  Iniciar ruta
   // ------------------------------
@@ -27,28 +25,35 @@ class DeliveryProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  //   Future<bool> finalizarEntrega(int idPaquete) async {
-  //     try {
-  //       final url = Uri.parse("$apiUrl/paquetes/$idPaquete/estado");
+  // Metodo para ver el estado del paquete
 
-  //       final response = await http.put(
-  //         url,
-  //         headers: {"Content-Type": "application/json"},
-  //         body: jsonEncode({"estado": "Entregado"}),
-  //       );
+  Future<bool> verificar() async {
+    if (_activeRoute == null) return false;
 
-  //       if (response.statusCode == 200) {
-  //         // Limpia la ruta activa
-  //         _activeRoute = null;
-  //         notifyListeners();
-  //         return true;
-  //       } else {
-  //         debugPrint("Error API: ${response.body}");
-  //         return false;
-  //       }
-  //     } catch (e) {
-  //       debugPrint("Error al conectar con API: $e");
-  //       return false;
-  //     }
-  //   }
+    //
+    try {
+      final url = Uri.parse(
+        'http://localhost:8000/paquetes/propios/${_activeRoute!['id_r]']}',
+      );
+      final response = await http.get(url);
+
+      if (response == 200) {
+        final paquetes = json.decode(response.body);
+        final actual = paquetes.firstWhere(
+          (p) => p['id_pq'] == _activeRoute!['id_pq'],
+          orElse: () => null,
+        );
+        //  Sino encuetra ek paquete o esta entregado
+        if (actual == null || actual['estado'] == 'Entregadp') {
+          _activeRoute = null;
+          notifyListeners();
+          return false;
+        }
+        return true;
+      }
+    } catch (e) {
+      print("Error encontrando el estado: $e");
+    }
+    return false;
+  }
 }

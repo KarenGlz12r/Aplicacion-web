@@ -14,6 +14,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:http/http.dart' as http;
 // Utilidades JSON (decoding responses)
 import 'dart:convert';
+import 'dart:async';
 // Provider/local que maneja la lógica de ruteo/entrega (startRoute, etc.)
 import '../DeliveryRoute.dart';
 // Pantalla para gestionar la entrega de un paquete (navegación final)
@@ -65,6 +66,46 @@ class _RutaPantallaState extends State<RutaPantalla> {
 
     // Probar conexión con servidores de mapas (para detectar problemas de red)
     _probarConexionMapas(); // Probar conexión
+
+    // Veririfacion por tiempo
+
+    Timer.periodic(Duration(seconds: 20), (timer) {
+      if (mounted) {
+        verificarEstado();
+      } else {
+        timer.cancel();
+      }
+    });
+  }
+
+  // Verificar qjue el paquete no haya sido entregado
+
+  Future<void> verificarEstado() async {
+    try {
+      final url = Uri.parse(
+        "http://localhost:8000/paquetes/propios/${widget.transportistaId}",
+      );
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final paquetes = json.decode(response.body);
+        final actual = paquetes.firstWhere(
+          (p) => p['id_pq'] == widget.paquete['id_pq'],
+          orElse: () => null,
+        );
+
+        // Si ya esta entregado
+        if (actual == null || actual['estado'] == 'Entregado') {
+          if (mounted) {
+            // limpiar la ruta
+            Provider.of<DeliveryProvider>(context, listen: false).finishRoute();
+            Navigator.pop(context);
+          }
+        }
+      }
+    } catch (e) {
+      print("Error verificando el esgtado : ${e}");
+    }
   }
 
   // Intenta descargar tiles de dos servidores de mapas para asegurar conectividad
@@ -371,6 +412,10 @@ class _RutaPantallaState extends State<RutaPantalla> {
             ElevatedButton(
               onPressed: () {
                 print("Destinatario: ${widget.paquete['destinatario']}");
+                Provider.of<DeliveryProvider>(
+                  context,
+                  listen: false,
+                ).finishRoute();
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
