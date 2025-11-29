@@ -139,6 +139,10 @@ class Authprovider with ChangeNotifier {
     }
   }
 
+  int? getTransportista() {
+    return _transportista_id;
+  }
+
   // Construye y devuelve el widget inicial correcto según el estado de autenticación
   Widget getAuthWrapper() {
     // Si aún no se ha completado la inicialización: mostrar loader

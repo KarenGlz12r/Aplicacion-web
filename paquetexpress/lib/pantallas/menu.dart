@@ -25,18 +25,14 @@ class _InicioState extends State<Inicio> {
       Container(
         width: double.infinity,
         height: double.infinity,
-        color: const Color.fromARGB(255, 69, 123, 157),
+        color: const Color.fromARGB(255, 45, 125, 174),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Image.asset(
-            //   'assets/images/forticodex.png',
-            //   width: 150,
-            //   height: 150,
-            // ),
+            Image.asset('assets/images/imagen2.png', width: 200, height: 200),
             const SizedBox(height: 16),
             const Text(
-              "Página Principal",
+              " Donde la eficiencia encuentra la puntualidad.",
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -79,20 +75,33 @@ class _InicioState extends State<Inicio> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color.fromARGB(255, 29, 53, 87),
-        title: Text(
-          "Paquexpress",
-          style: GoogleFonts.poppins(
-            color: Color.fromARGB(255, 241, 250, 238),
-            fontSize: 20,
-          ),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.local_shipping,
+              color: Color.fromARGB(255, 237, 246, 249),
+              size: 40,
+            ),
+            SizedBox(width: 10),
+            Text(
+              "PAQUEXPRESS",
+              style: GoogleFonts.rajdhani(
+                fontSize: 30,
+                color: Colors.white,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
         ),
       ),
+      // MENU INFERIOR
       body: _getPantallas(context)[_seleccionado],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _seleccionado,
         onTap: (i) => setState(() => _seleccionado = i),
         selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white70,
+        unselectedItemColor: Color.fromARGB(255, 203, 238, 243),
         backgroundColor: Color.fromARGB(255, 29, 53, 87),
         type: BottomNavigationBarType.fixed,
         items: const [

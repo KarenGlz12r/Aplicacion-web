@@ -6,22 +6,27 @@ import 'package:provider/provider.dart';
 import '../DeliveryRoute.dart';
 import 'Rutas.dart';
 
+// Creamos la clase que sera stateful porque tendra cambios
 class PaquetesSinEntregar extends StatefulWidget {
-  final int transportistaId;
-  final VoidCallback? onRecargar;
+  final int
+  transportistaId; // EL ID DEL TRANSPORTISTA, PARA HACER LA BUSQUEDA DE PAQUETES
+  final VoidCallback?
+  onRecargar; //Cada tanto recarga la pantalla para mantener actualizada la lista
 
   const PaquetesSinEntregar({
     super.key,
-    required this.transportistaId,
+    required this.transportistaId, //REQUIERE FORZOSAMENTE EL ID DEL TRANSPORTISTA
     this.onRecargar,
   });
 
+  // CREAMOS EL ESTADO
   @override
   State<PaquetesSinEntregar> createState() => _PaquetesSinEntregarState();
 }
 
+// CREAMOS LA PANTALLA DEL ESTADO
 class _PaquetesSinEntregarState extends State<PaquetesSinEntregar> {
-  List<dynamic> paquetes = [];
+  List<dynamic> paquetes = []; //SE CREA UNA LISTA PARA RECIBIR LOS PAQUETES
   bool cargando = true;
 
   @override
@@ -32,6 +37,7 @@ class _PaquetesSinEntregarState extends State<PaquetesSinEntregar> {
 
   Future<void> obtenerPaquetes() async {
     setState(() => cargando = true);
+
     try {
       final url = Uri.parse(
         "http://localhost:8000/paquetes/propios/${widget.transportistaId}",
@@ -102,19 +108,19 @@ class _PaquetesSinEntregarState extends State<PaquetesSinEntregar> {
                     ),
                     child: ListTile(
                       title: Text(
-                        p["nombre"],
+                        p["destinatario"],
                         style: GoogleFonts.poppins(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
                         ),
                       ),
                       subtitle: Text(
-                        "${p['calle']} ${p['numero']}, ${p['colonia']} C.P ${p['codigo_postal']}",
+                        " Colonia: ${p['colonia']}  Calle:${p['calle']}   Número: ${p['numero']}  Codigo postal: ${p['codigo_postal']} ",
                         style: GoogleFonts.poppins(fontSize: 13),
                       ),
                       trailing: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: azulOscuro,
+                          backgroundColor: Color.fromARGB(255, 3, 4, 94),
                         ),
                         onPressed: () async {
                           Provider.of<DeliveryProvider>(
@@ -134,9 +140,12 @@ class _PaquetesSinEntregarState extends State<PaquetesSinEntregar> {
 
                           recargar();
                         },
-                        child: const Text(
+                        child: Text(
                           "Iniciar entrega",
-                          style: TextStyle(color: Colors.white),
+                          style: GoogleFonts.poppins(
+                            color: Color.fromARGB(255, 222, 219, 210),
+                            fontSize: 15,
+                          ),
                         ),
                       ),
                     ),

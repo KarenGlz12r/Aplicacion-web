@@ -7,6 +7,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../DeliveryRoute.dart';
+import 'Entrega.dart';
 
 class RutaPantalla extends StatefulWidget {
   final Map<String, dynamic> paquete;
@@ -35,7 +36,7 @@ class _RutaPantallaState extends State<RutaPantalla> {
   @override
   void initState() {
     super.initState();
-    print("🔄 Iniciando RutaPantalla...");
+    print(" Iniciando Ruta...");
     _verificarPermisosUbicacion();
     _probarConexionMapas(); // Probar conexión
   }
@@ -149,7 +150,7 @@ class _RutaPantallaState extends State<RutaPantalla> {
 
   Future<void> _convertirDireccionACoordenadas() async {
     final direccion =
-        "${widget.paquete['calle']} ${widget.paquete['numero']}, ${widget.paquete['colonia']}";
+        "${widget.paquete['calle']} ${widget.paquete['numero']}, ${widget.paquete['colonia']},${widget.paquete['codigo_postal']}";
 
     final url =
         "https://nominatim.openstreetmap.org/search?format=json&q=${Uri.encodeComponent(direccion)}";
@@ -178,11 +179,6 @@ class _RutaPantallaState extends State<RutaPantalla> {
             " Destino coordenadas: ${destino!.latitude}, ${destino!.longitude}",
           );
 
-          if (origen != null) {
-            _generarRuta();
-          } else {
-            print(" Origen aún no disponible, esperando GPS...");
-          }
           setState(() {});
         } else {
           print(" Nominatim: No se encontraron resultados para la dirección");
@@ -196,76 +192,17 @@ class _RutaPantallaState extends State<RutaPantalla> {
     }
   }
 
-  Future<void> _generarRuta() async {
-    if (origen == null || destino == null) {
-      print("⚠️ No se puede generar ruta: origen o destino nulos");
-      return;
-    }
-
-    final url =
-        "https://router.project-osrm.org/route/v1/driving/"
-        "${origen!.longitude},${origen!.latitude};"
-        "${destino!.longitude},${destino!.latitude}"
-        "?geometries=geojson&overview=full";
-
-    print("Generando ruta con OSRM...");
-    print(" URL OSRM: $url");
-
-    try {
-      final res = await http.get(Uri.parse(url));
-
-      print(" Respuesta OSRM - Status: ${res.statusCode}");
-
-      if (res.statusCode == 200) {
-        final data = json.decode(res.body);
-
-        if (data["routes"] != null && data["routes"].isNotEmpty) {
-          final route = data["routes"][0];
-          final geometry = route["geometry"]["coordinates"];
-
-          rutaCoordenadas = geometry
-              .map<LatLng>((c) => LatLng(c[1], c[0]))
-              .toList();
-
-          distanciaKm = route["distance"] / 1000;
-          duracionSegundos = route["duration"].toInt();
-
-          print("Ruta generada exitosamente");
-          print("📏 Distancia: ${distanciaKm.toStringAsFixed(2)} km");
-          print("⏱️ Duración: $duracionSegundos segundos");
-
-          setState(() {});
-        } else {
-          print(" OSRM: No se pudo generar la ruta - respuesta vacía");
-        }
-      } else {
-        print(" Error HTTP OSRM: ${res.statusCode}");
-      }
-    } catch (e) {
-      print(" Error ruta OSRM: $e");
-      debugPrint("Error ruta OSRM: $e");
-    }
-  }
-
-  String formatoTiempo(int s) {
-    int h = s ~/ 3600;
-    int m = (s % 3600) ~/ 60;
-    if (h > 0) return "${h}h ${m}m";
-    return "$m min";
-  }
-
   @override
   Widget build(BuildContext context) {
     print(" Reconstruyendo widget...");
     print(" Origen: $origen");
     print(" Destino: $destino");
-    print(" Ruta coordenadas: ${rutaCoordenadas.length} puntos");
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color.fromARGB(184, 60, 63, 255),
         title: Text(
-          "Entrega: ${widget.paquete['nombre']}",
+          "Entrega: ${widget.paquete['destinatario']}",
           style: GoogleFonts.poppins(),
         ),
       ),
@@ -277,7 +214,7 @@ class _RutaPantallaState extends State<RutaPantalla> {
               initialCenter: origen ?? LatLng(20.650609, -100.406351),
               initialZoom: 10, // Zoom más abierto para ver la ruta larga
               onMapReady: () {
-                print("🗺️ Mapa listo y cargado");
+                print("Mapa listo y cargado");
                 setState(() {
                   _mapaCargado = true;
                 });
@@ -290,24 +227,6 @@ class _RutaPantallaState extends State<RutaPantalla> {
                 subdomains: const ['a', 'b', 'c'],
                 userAgentPackageName: 'com.appmovil.delivery',
               ),
-
-              // ORIGEN
-              if (origen != null)
-                MarkerLayer(
-                  markers: [
-                    Marker(
-                      point: origen!,
-                      width: 40,
-                      height: 40,
-                      child: const Icon(
-                        Icons.location_on,
-                        color: Colors.blue,
-                        size: 40,
-                      ),
-                    ),
-                  ],
-                ),
-
               // DESTINO
               if (destino != null)
                 MarkerLayer(
@@ -317,22 +236,10 @@ class _RutaPantallaState extends State<RutaPantalla> {
                       width: 40,
                       height: 40,
                       child: const Icon(
-                        Icons.flag,
-                        color: Colors.green,
+                        Icons.person_pin_circle,
+                        color: Color.fromARGB(255, 208, 9, 9),
                         size: 40,
                       ),
-                    ),
-                  ],
-                ),
-
-              // RUTA
-              if (rutaCoordenadas.isNotEmpty)
-                PolylineLayer(
-                  polylines: [
-                    Polyline(
-                      points: rutaCoordenadas,
-                      color: const Color.fromARGB(255, 218, 0, 0),
-                      strokeWidth: 4,
                     ),
                   ],
                 ),
@@ -360,7 +267,7 @@ class _RutaPantallaState extends State<RutaPantalla> {
                       ),
                     if (destino == null)
                       Text(
-                        "Calculando ruta...",
+                        "Calculando destino...",
                         style: TextStyle(color: Colors.white),
                       ),
                   ],
@@ -389,42 +296,30 @@ class _RutaPantallaState extends State<RutaPantalla> {
                 ),
               ),
 
-            if (distanciaKm > 0)
-              Text(
-                "Distancia: ${distanciaKm.toStringAsFixed(2)} km",
-                style: GoogleFonts.poppins(fontSize: 16),
-              ),
-            if (duracionSegundos > 0)
-              Text(
-                "Tiempo estimado: ${formatoTiempo(duracionSegundos)}",
-                style: GoogleFonts.poppins(fontSize: 16),
-              ),
             const SizedBox(height: 15),
-
+            // Leyenda de marcadores
+            SizedBox(height: 5),
+            Row(
+              children: [
+                Icon(Icons.person_pin_circle, color: Colors.red, size: 20),
+                SizedBox(width: 5),
+                Text('Dirección de destino: '),
+              ],
+            ),
+            SizedBox(height: 10),
+            Text(
+              " Colonia: ${widget.paquete['colonia']}, Calle:  ${widget.paquete['calle']}, Número: ${widget.paquete['numero']}, Codigo postal: ${widget.paquete['codigo_postal']}",
+            ),
+            SizedBox(height: 15),
             ElevatedButton(
-              onPressed: () async {
-                print(
-                  " Finalizando entrega para paquete: ${widget.paquete["id_paq"]}",
-                );
-                bool ok = await Provider.of<DeliveryProvider>(
+              onPressed: () {
+                Navigator.pushReplacement(
                   context,
-                  listen: false,
-                ).finalizarEntrega(widget.paquete["id_paq"]);
-
-                if (ok) {
-                  print("Entrega finalizada exitosamente");
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Paquete entregado correctamente"),
-                    ),
-                  );
-                  Navigator.pop(context);
-                } else {
-                  print(" Error al finalizar entrega");
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Error al completar entrega")),
-                  );
-                }
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        Entrega(id_paquete: widget.paquete['id_pq']),
+                  ),
+                );
               },
               child: const Text("Finalizar entrega"),
             ),
