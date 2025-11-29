@@ -71,7 +71,7 @@ class _EntregaState extends State<Entrega> {
       // En móvil: usar Image.file
       return Image.file(fotoSeleccionada!, fit: BoxFit.cover);
     } else {
-      // Placeholder cuando no hay imagen
+      // Texto para  cuando no hay imagen
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

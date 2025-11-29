@@ -66,13 +66,6 @@ class _FormularioState extends State<FormularioAdmin> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Bienvenido Administrador')),
         );
-
-        // Navegar
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => AdminPanel()),
-          (route) => false,
-        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Credenciales incorrectas')),

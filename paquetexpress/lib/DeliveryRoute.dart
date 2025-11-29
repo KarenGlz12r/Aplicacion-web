@@ -27,28 +27,28 @@ class DeliveryProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> finalizarEntrega(int idPaquete) async {
-    try {
-      final url = Uri.parse("$apiUrl/paquetes/$idPaquete/estado");
+  //   Future<bool> finalizarEntrega(int idPaquete) async {
+  //     try {
+  //       final url = Uri.parse("$apiUrl/paquetes/$idPaquete/estado");
 
-      final response = await http.put(
-        url,
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"estado": "Entregado"}),
-      );
+  //       final response = await http.put(
+  //         url,
+  //         headers: {"Content-Type": "application/json"},
+  //         body: jsonEncode({"estado": "Entregado"}),
+  //       );
 
-      if (response.statusCode == 200) {
-        // Limpia la ruta activa
-        _activeRoute = null;
-        notifyListeners();
-        return true;
-      } else {
-        debugPrint("Error API: ${response.body}");
-        return false;
-      }
-    } catch (e) {
-      debugPrint("Error al conectar con API: $e");
-      return false;
-    }
-  }
+  //       if (response.statusCode == 200) {
+  //         // Limpia la ruta activa
+  //         _activeRoute = null;
+  //         notifyListeners();
+  //         return true;
+  //       } else {
+  //         debugPrint("Error API: ${response.body}");
+  //         return false;
+  //       }
+  //     } catch (e) {
+  //       debugPrint("Error al conectar con API: $e");
+  //       return false;
+  //     }
+  //   }
 }
