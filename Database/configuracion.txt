@@ -1,0 +1,13 @@
+2. Configurar MySQL:
+
+En MySQL ingresar : 
+CREATE DATABASE evaluacion;
+
+-- Las tablas se crean automáticamente al ejecutar la API (repartidor, paquetes, entregas, admin)
+
+--Insert para el admin
+INSERT INTO admin (id, nombre, correo, password) 
+VALUES (1, 'Gabriel', 'gabriel@example.com', '00ld7302lld');
+
+
+EL CORREO GABRIEL@EXAMPLE.COM SE ENCUENTRA DADO DE ALTA EN UNA LISTA DE ADMIN EN LA APLICACION MÓVIL, POR LO CUAL ES IMPORTANTE QUE SEA ESW CORREO.
